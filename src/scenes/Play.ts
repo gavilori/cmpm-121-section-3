@@ -22,8 +22,11 @@ export default class Play extends Phaser.Scene {
   starfield?: Phaser.GameObjects.TileSprite;
   player?: Phaser.GameObjects.Shape;
 
+  enemy1?: Phaser.GameObjects.Shape;
+
   rotationSpeed = Phaser.Math.PI2 / 1000; // radians per millisecond
   movementSpeed = 3;
+  enemySpeed = 1.5;
 
   constructor() {
     super("play");
@@ -62,7 +65,13 @@ export default class Play extends Phaser.Scene {
       0xff0000,
     );
 
-    // this.ship1 = new Enemy();
+    this.enemy1 = this.add.rectangle(
+      (this.game.config.width as number) + 100,
+      100,
+      75,
+      50,
+      0xffffff,
+    );
   }
 
   isLaunched = false;
@@ -94,9 +103,14 @@ export default class Play extends Phaser.Scene {
       this.player!.y -= this.movementSpeed;
     }
 
-    if (this.player!.y < 0) {
+    if (this.player!.y <= 0 - this.player!.height) {
       this.player!.y = (this.game.config.height as number) - 50;
       this.isLaunched = false;
+    }
+
+    this.enemy1!.x -= this.enemySpeed;
+    if (this.enemy1!.x <= 0 - this.enemy1!.width) {
+      this.enemy1!.x = (this.game.config.width as number) + this.enemy1!.width;
     }
   }
 }
