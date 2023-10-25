@@ -2,18 +2,6 @@ import * as Phaser from "phaser";
 
 import starfieldUrl from "/assets/starfield.png";
 
-/*
-class Enemy {
-  moveSpeed?: number;
-
-  constructor(speed: number) {
-    this.moveSpeed = speed;
-  }
-
-  update() {}
-}
-*/
-
 export default class Play extends Phaser.Scene {
   fire?: Phaser.Input.Keyboard.Key;
   left?: Phaser.Input.Keyboard.Key;
@@ -23,6 +11,7 @@ export default class Play extends Phaser.Scene {
   player?: Phaser.GameObjects.Shape;
 
   enemy1?: Phaser.GameObjects.Shape;
+  enemy2?: Phaser.GameObjects.Shape;
 
   rotationSpeed = Phaser.Math.PI2 / 1000; // radians per millisecond
   movementSpeed = 3;
@@ -72,19 +61,25 @@ export default class Play extends Phaser.Scene {
       50,
       0xffffff,
     );
+
+    this.enemy2 = this.add.rectangle(
+      (this.game.config.width as number) + 100,
+      175,
+      50,
+      40,
+      0xffffff,
+    );
   }
 
   isLaunched = false;
 
-  update(_timeMs: number, delta: number) {
+  update(_timeMs: number) {
     this.starfield!.tilePositionX -= 4;
 
     if (this.left!.isDown && !this.isLaunched) {
-      this.player!.rotation -= delta * this.rotationSpeed;
       this.player!.x -= this.movementSpeed;
     }
     if (this.right!.isDown && !this.isLaunched) {
-      this.player!.rotation += delta * this.rotationSpeed;
       this.player!.x += this.movementSpeed;
     }
 
@@ -108,9 +103,39 @@ export default class Play extends Phaser.Scene {
       this.isLaunched = false;
     }
 
+    this.enemy1!.fillColor += 0x00ff00;
     this.enemy1!.x -= this.enemySpeed;
     if (this.enemy1!.x <= 0 - this.enemy1!.width) {
       this.enemy1!.x = (this.game.config.width as number) + this.enemy1!.width;
     }
+
+    this.enemy2!.fillColor += 0xff0000;
+    this.enemy2!.x -= this.enemySpeed * 2;
+    if (this.enemy2!.x <= 0 - this.enemy2!.width) {
+      this.enemy2!.x = (this.game.config.width as number) + this.enemy2!.width;
+    }
+
+    if (this.checkCollision(this.player!, this.enemy1!)) {
+      this.enemy1!.x = (this.game.config.width as number) + this.enemy1!.width;
+      this.player!.y = (this.game.config.height as number) - 50;
+      this.isLaunched = false;
+    }
+    if (this.checkCollision(this.player!, this.enemy2!)) {
+      this.enemy2!.x = (this.game.config.width as number) + this.enemy2!.width;
+      this.player!.y = (this.game.config.height as number) - 50;
+      this.isLaunched = false;
+    }
+  }
+
+  checkCollision(
+    player: Phaser.GameObjects.Shape,
+    enemy: Phaser.GameObjects.Shape,
+  ) {
+    return (
+      player.x < enemy.x + enemy.width &&
+      player.x + player.width > enemy.x &&
+      player.y < enemy.y + enemy.height &&
+      player.height + player.y > enemy.y
+    );
   }
 }
